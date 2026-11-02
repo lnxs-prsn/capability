@@ -1,55 +1,67 @@
-Find reusable project know-how with its context; open this file before reusing a technique or adding to your project's innovations.
+Draw on published know-how with its context, and offer what your project learns; read this guide before either.
 
-Run the single command with Python 3.9 or newer and the path to this clone's `knowhow.py`, from any directory. It uses Python's standard library and local files. Nothing runs in the background. Nothing is written into your project, and kits are never executed.
+Use Python 3.9+ and an explicit path to a fixed capability edition's `knowhow.py`. Replace `EDITION`, `PROJECT`, `INDEX` and `ID` in the examples; quote paths containing spaces. `PROJECT` is your own project's existing root, `INDEX` is the curator's published `INDEX.md`, and `ID` is a full content SHA-256 from a candidate. No network, dependencies beyond Python's standard library, background work or kit execution. Add `--json` for structured output.
 
-Replace `CLONE` below with this clone's path; quote paths containing spaces. Use `python` or your machine's Python 3.9+ launcher. The examples are command invocations, not shell scripts.
+1. Initialize your own project once:
 
-On first use, the command asks for the folder containing your projects. With no interactive input it asks you to run `python "CLONE/knowhow.py" configure --projects-folder "PROJECTS"`. It never searches for this folder. A changed projects-folder path starts a separate local namespace.
+   ```
+   python "EDITION/knowhow.py" init --project "PROJECT"
+   ```
 
-Ask for what fits the task:
+   This creates `.knowhow/project.json` with a stable random project UUID and adds a machine-readable identity/offer block to your `published/INDEX.md`. Existing prose and method declarations remain. Keep the UUID when moving or reassigning the project. A deliberate fork initializes a new UUID before publishing; a missing local identity with an existing public declaration must be restored, not regenerated. Project identity is independent of its name, folder and organization.
 
-```
-python "CLONE/knowhow.py" ask --task "repeatable fixture setup" --project "PROJECT" --limit 5
-```
+2. Ask for a compact screening list relevant to your task:
 
-`--project` names an existing project directory inside the configured projects folder, including a new project without `innovations/`. If omitted, the nearest ancestor of your working directory with `.git` or a direct `innovations/` is used. A nested project's nearest marker wins. Without a marker, supply the project explicitly. Project identity is its relative path, not its name; renaming a project changes its identity.
+   ```
+   python "EDITION/knowhow.py" ask --project "PROJECT" --catalogue "INDEX" --task "repeatable setup" --limit 5
+   ```
 
-Every ask refreshes all discovered collections, even if their projects are closed. Unchanged bundle hashes reuse snapshots and check results. Discovery uses deterministic lexical matches, weighted toward title, problem and positive suitability. Matching terms are reasons to inspect, not proof of fit. Synonyms may be missed. Negative-condition matches are warnings to read those conditions. No match returns no offer; rephrase the task. Default limit is 5, maximum 20; the candidate list is also capped at 12000 serialized UTF-8 bytes. `omitted` says how many matches did not fit. Increase the limit where helpful or make the task more specific. Discovery is deliberately lossy.
+   Only admitted, eligible content is offered. An empty catalogue returns no candidates. Matching is deterministic and lexical; synonyms can be missed. Matching words are reasons to inspect, not proof of fit. Positive conditions, negative-condition matches, limits and unknowns support screening. The discovery projection truncates conditions. Default five candidates, maximum twenty, and at most 12000 UTF-8 bytes for the candidate list; `omitted` counts matches that did not fit. Rephrase when no useful match appears.
 
-Use the full content ID from an offer to read its context:
+3. Select only relevant candidates to load full context:
 
-```
-python "CLONE/knowhow.py" select FULL_CONTENT_ID --project "PROJECT"
-```
+   ```
+   python "EDITION/knowhow.py" select ID --project "PROJECT" --catalogue "INDEX"
+   ```
 
-Selection returns full PATTERN text, the full structured context, check/review state, decision reasons, source locations and a resolvable local bundle path containing the kit. Inspect relevant kit files there. Evidence references are not fetched or independently verified. Read circumstances, prerequisites, negative evidence, limits, adaptations and drift before deciding what to apply. Selection logs an inspection; it does not assert successful reuse. Restrictions are checked again at selection, so an old offer can become unavailable.
+   Read the full PATTERN and structured record, prerequisites, adaptations, adverse evidence, verification scope, limits and evolution account. Inspect the kit in the returned `bundle` path. Evidence locators are never fetched or independently verified. Selection verifies the selected bytes and records inspection; it claims no successful reuse. Nothing is copied into your working files automatically. Exact copies have one content identity and several supplying origins; copies are not independent successes.
 
-Only admitted material is offered to other projects. Your own supplied material can appear as `own-unadmitted`, with missing-context diagnostics. Copies are one content identity with several locations, not several independent successes. Changed bytes become a new identity with no inherited admission. Source removal never deletes retained versions. A retained location may be historical (`current: 0`). Similar contributions remain separate until the owner decides otherwise.
+4. Your project's executive may decline content for this project:
 
-Before adding a contribution to your own `innovations/`, read [the standard](standard/STANDARD.md) and start from [its template](standard/PATTERN.template.md). Check your addition:
+   ```
+   python "EDITION/knowhow.py" decline ID --project "PROJECT" --actor "project executive" --reason "Why it does not fit"
+   ```
 
-```
-python "CLONE/knowhow.py" check "PROJECT/innovations/my-technique"
-```
+   Append `--undo` and a new reason to reverse. A decline suppresses both screening and selection, including a merged successor. Other projects' records are unaffected; nothing is deleted. Actor strings record attribution and do not authenticate authority.
 
-The response shows missing, invalid or unknown items and what to supply, then required human review; it emits no successful field checks. Complete recorded presence proves neither truth nor admission. Exit status is 0 for complete presence, 1 for incomplete/invalid material and 2 for usage/read failure. The check neither gathers other projects nor requires projects-folder configuration. `--json` returns the same compact diagnostic content in machine-readable form.
+5. After actual use, record its outcome and estimated saving:
 
-Your project's executive can decline a contribution for this project:
+   ```
+   python "EDITION/knowhow.py" log-use ID --project "PROJECT" --outcome "Observed result, including failures" --saving-note "Estimated saving and its basis"
+   ```
 
-```
-python "CLONE/knowhow.py" decline FULL_CONTENT_ID --project "PROJECT" --actor "project executive" --reason "Why it does not fit"
-```
+   Outcomes and savings are caller reports. Command output bytes and elapsed time are measured separately; bytes are not model tokens. An inspection alone establishes no savings.
 
-A decline suppresses offers and selection for that project without deleting anything. Append `--undo` with a reason to reverse it. This command records attribution; it does not authenticate a role.
+6. Before offering your own addition, read [the standard](standard/STANDARD.md), start with [its template](standard/PATTERN.template.md), complete your contribution in your own working collection, then check:
 
-After actual use, record the result and optional estimate of resources saved:
+   ```
+   python "EDITION/knowhow.py" check "PROJECT/innovations/my-technique" --project "PROJECT"
+   ```
 
-```
-python "CLONE/knowhow.py" log-use FULL_CONTENT_ID --project "PROJECT" --outcome "What happened, including failures" --saving-note "Estimated time or attention saved, and basis"
-```
+   This checks your supplied addition only. It reports missing, invalid and unknown items and required human review; complete presence proves neither truth nor admission. The standard's parent-index, layout and contribution-procedure duties apply to your working collection. Verify evidence and generic assets before offering. The collection's private index need not be published. Exit codes: 0 complete, 1 incomplete/invalid, 2 usage/read failure. For a check with no initialization, records or writes, use `python "EDITION/check_contribution.py" "PROJECT/innovations/my-technique" --json`.
 
-Output bytes, elapsed time and gathering counts are logged automatically; savings are caller-reported estimates. Bytes are not model tokens. Inspection alone is not evidence of savings. Add `--json` to any command for a structured response. `self-check` reports the interpreter, platform, local storage and an isolated synthetic gather/check/selection exercise on the current machine.
+7. Publish your checked addition deliberately:
 
-Owner decisions are documented separately in [OWNER.md](OWNER.md).
+   ```
+   python "EDITION/knowhow.py" offer "PROJECT/innovations/my-technique" --project "PROJECT"
+   ```
 
-State lives only in this clone's git-ignored `.local/`: settings, content snapshots, decision history and use/cost records. A fresh clone starts empty and works without another project or this clone's original parent. Configure its projects folder to gather what exists on that machine. Cloning does not restore personal state or decisions: separately preserve `.local/` if those histories are needed. Do not force-add it to version control. Symlinks/reparse points, repository metadata, standard dependency environments and secret entries are skipped; unreadable or omitted bundle material is diagnosed and prevents admission. Only safely readable material can be retained. Hashing buffers one bundle at a time in memory.
+   This checks before offering, freezes PATTERN (including its context) and the whole kit into `published/knowhow/offers/<manifest-hash>/`, and adds its relative path/hash to your public index. Nothing is read from other projects. All kit files must be declared. Keep the working bundle separate; a change produces a new content identity requiring a fresh admission. Offers already published stay fixed. Repeating an unchanged offer is idempotent. Share your published part through your organization's arrangement; the capability never searches for projects. Offering does not automatically admit content.
+
+Each agent writes only in its own project. All commands require an explicit `--project`; this is the caller's ownership assertion, not an authentication boundary. The code rejects links/reparse points, traversal, prohibited names and special files. Never point a writable project at an executable edition. Running from a fixed edition creates no state or bytecode there. Local state is `.knowhow/`: UUID, declines, inspections/costs, actual-use accounts and catalogue identity/locator history. Preserve it with your project. The code's clone needs none of those personal records to work empty.
+
+Every ask and select resolves the current catalogue through the supplied public index and rechecks its published policy. An earlier ID does not bypass a later published exclusion. Invalid or unavailable current policy fails closed. Curator decisions reach takers when published; a disconnected copy cannot learn of later exclusions, and already published bytes remain directly readable. Local declines take effect immediately for this project's commands.
+
+A catalogue's manifest hash is its identity, separately recorded in your history. When its project moves, explicitly supply the new published index and verify the previously recorded edition hash before accepting the locator change; do not guess from a directory name. A new current edition has a new verified hash and is recorded as such. Keep the capability edition identity and external manifest hash supplied by its publisher too; verify its `EDITION.json` and listed files after movement before using it. Capability updates never mutate the edition you took.
+
+Run `python "EDITION/knowhow.py" self-check --project "PROJECT" --json` for a temporary invented offer-to-selection exercise on this machine. It records its cost in your project and removes its synthetic projects. It proves no real savings or operation on another OS. See [publication formats](PUBLICATION.md) for portable records.
