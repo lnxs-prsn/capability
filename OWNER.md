@@ -50,16 +50,22 @@ Readers resolve the current catalogue for every ask/select; decisions become eff
 
 Retained offers and SQLite history live in `.knowhow/curator/`. Preserve the whole curator project to recover personal decisions and knowledge; deleting the database loses authoritative decisions. SQLite transactions protect decision history; interrupted intake can leave a complete unindexed retained offer which the next identical intake can reuse. No deletion, periodic refresh, synchronization or organization-wide cost aggregation runs. The curator's `costs` table records its own output bytes, elapsed time and intake counts. Takers keep their own costs and use accounts.
 
+## Entry from a listing
+
+The listing supplies this publisher's location. Its mutable INDEX.md must clearly name the current fixed capability edition, its relative directory, its EDITION.json SHA-256 and its USE.md entry. It must identify the current catalogue through the knowhow:v1 catalogue reference and say to give this index to ask/select. Resolve relative paths from the index directory; distinguish historical entries from current pointers. Fixed editions cannot name later editions or catalogues. No new publication format is required.
+
+For a clone without a publishing index, USE.md is the entry and the clone runs directly. It needs no local packing or catalogue to initialize a project, check or offer. If curating for yourself, initialize your own separate project as CURATOR and use the catalogue publication command above; with no admitted content it publishes an empty catalogue. Its published INDEX.md then serves ask/select. Without a catalogue reference, those commands fail with guidance; they do not fall back to an earlier catalogue.
+
 ## Publish the capability itself
 
 From the developing generic source, after checks:
 
 ```
-python "SOURCE/knowhow.py" pack-capability --project "SOURCE" --edition capability-001
+python "SOURCE/knowhow.py" pack-capability --project "SOURCE" --edition capability-002
 ```
 
 This maintenance command requires the loaded developing capability source itself, rejects fixed editions, and stages only beneath its ignored `.staging/`, with its own measured cost journal beside the stages. It does not initialize a project, publish an edition or write anywhere outside the source. A fixed explicit allowlist includes runtime code, standard/template, checks, guides, tests and UPDATE.md; excludes state, repositories, real offers and personal paths. The output gives the manifest hash. Verify every listed file and report that hash to the publishing executive, who installs the complete fixed stage under its own published part and indexes it with that external hash. Keep the same source-relative layout. Changing any file requires a new fixed edition; deterministic manifest bytes identify the same inputs identically.
 
 `UPDATE.md` explains this edition's changes and taking impact. Keep external capability edition identity beside its locator; after movement verify the same manifest and file hashes before repointing. A clone recovers the generic capability empty and working, with no personal catalogue required. It never restores private decisions or innovations from GitHub. Only the assigned publisher commits/pushes; these commands do neither.
 
-Validation from the source or a disposable copy: `python -B -m unittest discover -s tests -v` and `python -B -m standard.render --check`. Tests use invented publications in temporary directories; `self-check` exercises the current machine. Python 3.9 syntax checks do not prove a run on Python 3.9 or Windows. To update generated standard files, use the developing source's `standard/definition.py` and `python -B -m standard.render`; never edit a fixed edition.
+Validation: from the source root, or from the root of a disposable copy of a fixed edition, run `python -B -m unittest discover -s tests -v` and `python -B -m standard.render --check`. Tests use invented publications in temporary directories. Source validation tests packing and detached edition operation; edition-only validation tests detached operation directly and verifies that packing is rejected. Only the source packing test is skipped when running from an edition; no edition marker is removed to make it resemble source. Run the suite on the resulting edition copy too before publishing; `self-check` exercises the current machine. Python 3.9 syntax checks do not prove a run on Python 3.9 or Windows. To update generated standard files, use the developing source's `standard/definition.py` and `python -B -m standard.render`; never edit a fixed edition.

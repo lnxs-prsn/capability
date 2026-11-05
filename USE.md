@@ -1,6 +1,12 @@
-Draw on published know-how with its context, and offer what your project learns; read this guide before either.
+Before drawing on shared know-how or offering yours, read INDEX.md at the listed location, or USE.md in a clone.
 
-Use Python 3.9+ and an explicit path to a fixed capability edition's `knowhow.py`. Replace `EDITION`, `PROJECT`, `INDEX` and `ID` in the examples; quote paths containing spaces. `PROJECT` is your own project's existing root, `INDEX` is the curator's published `INDEX.md`, and `ID` is a full content SHA-256 from a candidate. No network, dependencies beyond Python's standard library, background work or kit execution. Add `--json` for structured output.
+At a publisher's location, read its INDEX.md for the current fixed capability edition, its manifest hash and USE.md, and its current catalogue. Resolve paths from that index's directory; verify the capability manifest and listed files before use. Give the index to ask/select as INDEX. Fixed editions cannot name future editions or catalogues.
+
+With only a clone, read this USE.md and use the clone directly wherever the examples say EDITION. You can initialize your own project, check and offer without a catalogue. Without a curator's published index naming a catalogue, there is nothing yet to ask or select; obtain that index through your arrangement when available. To curate for yourself, follow [OWNER.md](OWNER.md).
+
+If your executive is considering know-how your project already holds, read [Existing know-how](EXISTING.md); otherwise continue below.
+
+Use Python 3.9+ and an explicit path to the chosen edition's or clone's `knowhow.py`. Replace `EDITION`, `PROJECT`, `INDEX` and `ID` in the examples; quote paths containing spaces. `PROJECT` is your own project's existing root, `INDEX` is the curator's published `INDEX.md`, and `ID` is a full content SHA-256 from a candidate. No network, dependencies beyond Python's standard library, background work or kit execution. Add `--json` for structured output.
 
 1. Initialize your own project once:
 

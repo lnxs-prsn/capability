@@ -309,7 +309,11 @@ def load_listing(path):
 class Catalogue(Policy):
     def __init__(self, index):
         index = ordinary_path(index)
-        block = read_index(index)
+        block = read_index(index, optional=True)
+        if block is None or 'catalogue' not in block:
+            raise ValueError("This index names no catalogue; obtain a curator's published INDEX.md "
+                             "naming a current catalogue and supply it with --catalogue. "
+                             "To curate for yourself, follow OWNER.md. No fallback was used.")
         ref = block['catalogue']
         self.path = below(index.parent, ref['path'])
         self.hash = identity(ref['sha256'])

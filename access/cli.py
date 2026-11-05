@@ -66,7 +66,7 @@ def pack_capability(source, edition):
     if not portable(edition):
         raise ValueError('Use a portable single-component edition name')
     names = ['knowhow.py', 'check_contribution.py', 'USE.md', 'OWNER.md', 'PUBLICATION.md',
-             'UPDATE.md', '.gitignore', 'access/__init__.py', 'access/cli.py', 'access/engine.py',
+             'UPDATE.md', 'EXISTING.md', '.gitignore', 'access/__init__.py', 'access/cli.py', 'access/engine.py',
              'access/publication.py', 'standard/__init__.py', 'standard/check.py',
              'standard/definition.py', 'standard/render.py', 'standard/STANDARD.md',
              'standard/PATTERN.template.md', 'tests/test_standard.py', 'tests/test_access.py']

@@ -93,6 +93,42 @@ class PublicationTests(unittest.TestCase):
         self.cli('publish-catalogue', '--edition', 'empty')
         self.assertEqual(self.ask()['offers'], [])
 
+    def test_missing_catalogue_explains_next_step_without_fallback(self):
+        cid = self.ready()
+        self.ask()
+        block = read_index(self.curator.index)
+        del block['catalogue']
+        write_index(self.curator.index, block)
+        for command, args in [('ask', ['--task', 'setup']), ('select', [cid])]:
+            result = self.cli(command, *args, '--catalogue', self.curator.index, expected=2)
+            self.assertIn('names no catalogue', result['error'])
+            self.assertIn('--catalogue', result['error'])
+            self.assertIn('OWNER.md', result['error'])
+        self.curator.index.write_text('# Published material\n', encoding='utf-8')
+        for command, args in [('ask', ['--task', 'setup']), ('select', [cid])]:
+            result = self.cli(command, *args, '--catalogue', self.curator.index, expected=2)
+            self.assertIn('names no catalogue', result['error'])
+
+    def test_direct_generic_copy_works_without_catalogue(self):
+        code = self.temporary_source()
+        before = self.snapshot(code)
+        project = self.base / 'fresh project'
+        project.mkdir()
+        result = self.run_code(code, 'init', '--project', project)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        project = Project(project)
+        result = self.run_code(code, 'self-check', '--project', project.root)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        bundle = self.write(project)
+        for command in ('check', 'offer'):
+            result = self.run_code(code, command, bundle, '--project', project.root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        result = self.run_code(code, 'ask', '--task', 'setup', '--catalogue', project.index,
+                               '--project', project.root)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('names no catalogue', result.stderr)
+        self.assertEqual(before, self.snapshot(code))
+
     def test_init_index_preservation_and_identity_restoration(self):
         root = self.base / 'fresh'
         (root / 'published').mkdir(parents=True)
@@ -450,23 +486,43 @@ class PublicationTests(unittest.TestCase):
                              'exercise_seconds': round(time.perf_counter() - start, 3)})
         print('Synthetic growth: ' + dumps(measures))
 
-    def test_fixed_capability_detached_empty_and_readonly(self):
-        cid = self.ready()
-        # Copy only generic files to a temporary developing source; packaging there cannot touch the real source.
+    def run_code(self, code, *args):
+        return subprocess.run([sys.executable, '-B', str(code / 'knowhow.py'), *map(str, args)],
+                              cwd=str(self.taker.root), text=True, capture_output=True)
+
+    def temporary_source(self):
         source = self.base / 'generic source'
-        shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns('.git', '.local', '.knowhow', '.staging', '__pycache__'))
-        def run(code, *args):
-            return subprocess.run([sys.executable, '-B', str(code / 'knowhow.py'), *map(str, args)],
-                                  cwd=str(self.taker.root), text=True, capture_output=True)
-        first = run(source, 'pack-capability', '--project', source, '--edition', 'one')
+        shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns(
+            '.git', '.local', '.knowhow', '.staging', '__pycache__'))
+        return source
+
+    @unittest.skipIf((ROOT / 'EDITION.json').exists(), 'Packing requires developing source')
+    def test_source_packing_is_deterministic(self):
+        source = self.temporary_source()
+        first = self.run_code(source, 'pack-capability', '--project', source, '--edition', 'one')
         self.assertEqual(first.returncode, 0, first.stderr)
         packed = json.loads(first.stdout)
         edition = Path(packed['stage'])
         manifest = parse_manifest(edition / 'EDITION.json', packed['manifest_sha256'], 'capability')
         for name in manifest['files']:
             verified_file(edition, manifest, name)
-        second = run(source, 'pack-capability', '--project', source, '--edition', 'one')
+        self.assertIn('EXISTING.md', manifest['files'])
+        second = self.run_code(source, 'pack-capability', '--project', source, '--edition', 'one')
+        self.assertEqual(second.returncode, 0, second.stderr)
         self.assertEqual(json.loads(second.stdout)['manifest_sha256'], packed['manifest_sha256'])
+
+    def test_fixed_capability_detached_empty_and_readonly(self):
+        cid = self.ready()
+        run = self.run_code
+        if (ROOT / 'EDITION.json').exists():
+            edition = self.base / 'detached edition'
+            shutil.copytree(ROOT, edition, ignore=shutil.ignore_patterns('__pycache__'))
+        else:
+            source = self.temporary_source()
+            packed = run(source, 'pack-capability', '--project', source, '--edition', 'one')
+            self.assertEqual(packed.returncode, 0, packed.stderr)
+            edition = self.base / 'detached edition'
+            shutil.copytree(json.loads(packed.stdout)['stage'], edition)
         before = self.snapshot(edition)
         for path in edition.rglob('*'):
             path.chmod(0o555 if path.is_dir() else 0o444)
@@ -484,6 +540,9 @@ class PublicationTests(unittest.TestCase):
                                    cwd=str(self.taker.root), text=True, capture_output=True)
             self.assertEqual(check.returncode, 0, check.stderr)
             self.assertEqual(run(edition, 'init', '--project', edition).returncode, 2)
+            rejected = run(edition, 'pack-capability', '--project', edition, '--edition', 'two')
+            self.assertEqual(rejected.returncode, 2)
+            self.assertIn('not an edition', rejected.stderr)
             self.assertEqual(before, self.snapshot(edition))
             self.assertFalse(list(edition.rglob('__pycache__')))
         finally:
